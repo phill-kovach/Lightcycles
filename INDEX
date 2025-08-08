@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tron Light Cycle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap');
+        
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0d0d1a;
+            color: #00ffcc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        #game-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        #gameCanvas {
+            background-color: #0d0d1a;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 15px #00ffcc, inset 0 0 10px #00ffcc;
+        }
+
+        #menu, #game-over, #round-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 15px #00ffcc;
+            padding: 2.5rem;
+            text-align: center;
+            border-radius: 1rem;
+            min-width: 300px;
+            max-width: 90%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .menu-button, .start-button {
+            background: none;
+            border: 2px solid #00ffcc;
+            color: #00ffcc;
+            padding: 0.75rem 2rem;
+            margin: 0.5rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 1.25rem;
+            transition: all 0.2s ease-in-out;
+            border-radius: 0.5rem;
+        }
+
+        .menu-button:hover, .start-button:hover {
+            box-shadow: 0 0 10px #00ffcc, inset 0 0 5px #00ffcc;
+            background-color: rgba(0, 255, 204, 0.1);
+        }
+        
+        .menu-button.active {
+            background-color: #00ffcc;
+            color: #0d0d1a;
+            box-shadow: 0 0 15px #00ffcc;
+        }
+
+        .difficulty-options, .opponent-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .difficulty-options button, .opponent-options button {
+            background: none;
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .difficulty-options button.active, .opponent-options button.active {
+            background-color: #00ffcc;
+            color: #0d0d1a;
+            box-shadow: 0 0 5px #00ffcc;
+        }
+        
+        #game-over h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px #ff0066;
+            color: #ff0066;
+        }
+
+        #game-over p, #round-info p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        #round-info h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        #game-over .menu-button {
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+
+        #round-info .start-button {
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            text-align: center;
+            color: #00ffcc;
+        }
+
+        @media (max-width: 600px) {
+            #menu, #game-over, #round-info {
+                padding: 1rem;
+            }
+            #game-over h1 {
+                font-size: 1.5rem;
+            }
+            #game-over p {
+                font-size: 1rem;
+            }
+            .menu-button, .start-button {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Main Menu -->
+        <div id="menu" class="">
+            <h1 class="text-3xl font-bold mb-4">Tron Light Cycles</h1>
+            <div id="game-mode-selection">
+                <button class="menu-button active" data-mode="freeplay">Freeplay</button>
+                <button class="menu-button" data-mode="arcade">Arcade</button>
+            </div>
+            
+            <div id="freeplay-options" class="mt-4">
+                <div class="mb-2">
+                    <label class="block mb-2">Difficulty:</label>
+                    <div class="difficulty-options">
+                        <button class="active" data-difficulty="easy">Easy</button>
+                        <button data-difficulty="medium">Medium</button>
+                        <button data-difficulty="hard">Hard</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block mb-2">Number of Opponents:</label>
+                    <div class="opponent-options">
+                        <button class="active" data-opponents="1">1</button>
+                        <button data-opponents="2">2</button>
+                        <button data-opponents="3">3</button>
+                        <button data-opponents="4">4</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="arcade-options" class="hidden">
+                <p>Survive for as long as you can. Each round, the AI gets faster and smarter. Every three rounds, a new opponent is added!</p>
+            </div>
+            
+            <button id="startGameButton" class="start-button mt-4">Start Game</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over" class="hidden">
+            <h1 class="text-3xl font-bold">Game Over</h1>
+            <p id="gameOverText" class="mt-4">You lasted for 0 rounds.</p>
+            <button id="restartButton" class="menu-button mt-4">Restart</button>
+        </div>
+        
+        <!-- Round Info Screen (for Arcade Mode) -->
+        <div id="round-info" class="hidden">
+            <h2 id="roundTitle" class="font-bold">Round 1</h2>
+            <p id="roundStatus">Get ready!</p>
+            <button id="nextRoundButton" class="start-button mt-4">Start Round</button>
+        </div>
+
+        <!-- Instructions -->
+        <div id="instructions">
+            Player 1: W, A, S, D to move.
+        </div>
+    </div>
+    
+    <script>
+        // --- Game Setup and State ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scale = 10;
+        const width = 80;
+        const height = 60;
+        let gameLoop;
+        let players = [];
+        let trails = [];
+        let gameOver = false;
+        let gameActive = false;
+
+        // UI elements
+        const menuScreen = document.getElementById('menu');
+        const gameOverScreen = document.getElementById('game-over');
+        const roundInfoScreen = document.getElementById('round-info');
+        const startGameButton = document.getElementById('startGameButton');
+        const restartButton = document.getElementById('restartButton');
+        const nextRoundButton = document.getElementById('nextRoundButton');
+        const freeplayOptions = document.getElementById('freeplay-options');
+        const arcadeOptions = document.getElementById('arcade-options');
+        const gameModeButtons = document.querySelectorAll('#game-mode-selection .menu-button');
+        const difficultyButtons = document.querySelectorAll('.difficulty-options button');
+        const opponentButtons = document.querySelectorAll('.opponent-options button');
+        const gameOverText = document.getElementById('gameOverText');
+        const roundTitle = document.getElementById('roundTitle');
+        const roundStatus = document.getElementById('roundStatus');
+        
+        // Game settings
+        let gameMode = 'freeplay';
+        let difficulty = 'easy';
+        let numOpponents = 1;
+        let currentRound = 0;
+        let arcadeOpponents = 1;
+
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+
+        // Player configuration
+        const playerConfig = [
+            { id: 0, color: '#ff0066', startPos: { x: 5, y: height / 2 }, direction: 'right', controls: { w: 'w', a: 'a', s: 's', d: 'd' }, isAI: false },
+            { id: 1, color: '#00ccff', startPos: { x: width - 6, y: height / 2 }, direction: 'left', controls: {}, isAI: true },
+            { id: 2, color: '#ffff33', startPos: { x: width / 2, y: 5 }, direction: 'down', controls: {}, isAI: true },
+            { id: 3, color: '#cc66ff', startPos: { x: width / 2, y: height - 6 }, direction: 'up', controls: {}, isAI: true },
+            { id: 4, color: '#66ff66', startPos: { x: 5, y: 5 }, direction: 'down', controls: {}, isAI: true },
+        ];
+
+        // --- Event Listeners for UI ---
+        gameModeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                gameModeButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                gameMode = button.dataset.mode;
+                if (gameMode === 'freeplay') {
+                    freeplayOptions.classList.remove('hidden');
+                    arcadeOptions.classList.add('hidden');
+                } else {
+                    freeplayOptions.classList.add('hidden');
+                    arcadeOptions.classList.remove('hidden');
+                }
+            });
+        });
+
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                difficultyButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                difficulty = button.dataset.difficulty;
+            });
+        });
+        
+        opponentButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                opponentButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                numOpponents = parseInt(button.dataset.opponents, 10);
+            });
+        });
+
+        startGameButton.addEventListener('click', () => {
+            menuScreen.classList.add('hidden');
+            if (gameMode === 'freeplay') {
+                initGame();
+            } else { // Arcade mode
+                currentRound = 0;
+                showRoundInfoScreen();
+            }
+        });
+
+        nextRoundButton.addEventListener('click', () => {
+            roundInfoScreen.classList.add('hidden');
+            currentRound++;
+            
+            // Arcade mode logic for increasing difficulty and adding opponents
+            let arcadeDifficulty = 'easy';
+            if (currentRound > 0) {
+                if (currentRound % 3 === 0) {
+                    arcadeOpponents = Math.min(arcadeOpponents + 1, 4);
+                }
+                const difficultyLevels = ['easy', 'medium', 'hard'];
+                const diffIndex = (currentRound - 1) % difficultyLevels.length;
+                arcadeDifficulty = difficultyLevels[diffIndex];
+            }
+            
+            initGame(arcadeOpponents, arcadeDifficulty);
+        });
+
+        restartButton.addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            menuScreen.classList.remove('hidden');
+        });
+
+        // Player controls
+        document.addEventListener('keydown', e => {
+            if (!gameActive) return;
+
+            const player = players[0];
+            const key = e.key.toLowerCase();
+            const currentDir = player.direction;
+
+            if (key === player.controls.w && currentDir !== 'down') player.direction = 'up';
+            else if (key === player.controls.s && currentDir !== 'up') player.direction = 'down';
+            else if (key === player.controls.a && currentDir !== 'right') player.direction = 'left';
+            else if (key === player.controls.d && currentDir !== 'left') player.direction = 'right';
+        });
+
+        // --- Game Logic Functions ---
+        function initGame(opponents = numOpponents, gameDifficulty = difficulty) {
+            gameActive = true;
+            gameOver = false;
+            players = [];
+            trails = [];
+
+            // Add player 1
+            players.push({
+                ...playerConfig[0],
+                x: playerConfig[0].startPos.x,
+                y: playerConfig[0].startPos.y,
+                path: [{ x: playerConfig[0].startPos.x, y: playerConfig[0].startPos.y }],
+                speed: 100 // Constant player speed
+            });
+
+            // Add AI opponents based on the mode settings
+            for (let i = 1; i <= opponents; i++) {
+                const ai = {
+                    ...playerConfig[i],
+                    x: playerConfig[i].startPos.x,
+                    y: playerConfig[i].startPos.y,
+                    path: [{ x: playerConfig[i].startPos.x, y: playerConfig[i].startPos.y }],
+                    speed: getAISpeed(gameDifficulty),
+                    aggressiveness: getAIAggressiveness(gameDifficulty)
+                };
+                players.push(ai);
+            }
+            
+            // Add all players' starting positions to the trails
+            players.forEach(player => {
+                trails.push({ x: player.x, y: player.y });
+            });
+
+            // Start the game loop
+            clearInterval(gameLoop);
+            gameLoop = setInterval(update, 100); // Main game loop speed
+        }
+        
+        function getAISpeed(difficultyLevel) {
+            switch (difficultyLevel) {
+                case 'easy': return 150;
+                case 'medium': return 100;
+                case 'hard': return 70;
+                default: return 100;
+            }
+        }
+        
+        function getAIAggressiveness(difficultyLevel) {
+            switch (difficultyLevel) {
+                case 'easy': return 0.2; // 20% chance to make a more aggressive move
+                case 'medium': return 0.5; // 50% chance
+                case 'hard': return 0.8; // 80% chance
+                default: return 0.5;
+            }
+        }
+        
+        function update() {
+            if (gameOver) {
+                endGame();
+                return;
+            }
+
+            // Clear the canvas
+            ctx.fillStyle = '#0d0d1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Update and draw each player
+            players.forEach(player => {
+                if (player.isAI) {
+                    moveAI(player);
+                } else {
+                    movePlayer(player);
+                }
+                
+                // Check for collision
+                if (checkCollision(player)) {
+                    // Handle game over or player elimination
+                    if (player.id === 0) { // Main player collision
+                        gameOver = true;
+                    }
+                    
+                    // Mark player as eliminated by changing their color to gray
+                    player.color = '#555555';
+                    // Remove player from the active players list
+                    const index = players.findIndex(p => p.id === player.id);
+                    if (index > -1) {
+                        players.splice(index, 1);
+                    }
+                }
+                
+                // Draw player's trail
+                player.path.forEach(segment => {
+                    ctx.fillStyle = player.color;
+                    ctx.fillRect(segment.x * scale, segment.y * scale, scale, scale);
+                });
+            });
+            
+            // Check for game completion in Arcade mode
+            if (gameMode === 'arcade' && players.length <= 1) {
+                gameOver = true; // This will trigger the end game logic
+            }
+        }
+        
+        function movePlayer(player) {
+            // Update position based on direction
+            if (player.direction === 'up') player.y--;
+            else if (player.direction === 'down') player.y++;
+            else if (player.direction === 'left') player.x--;
+            else if (player.direction === 'right') player.x++;
+            
+            // Add new position to path and trails
+            player.path.push({ x: player.x, y: player.y });
+            trails.push({ x: player.x, y: player.y });
+        }
+        
+        function moveAI(player) {
+            // Simple AI that checks for immediate collision and tries to turn
+            const potentialMoves = ['up', 'down', 'left', 'right'];
+            const currentDir = player.direction;
+            let newDir = currentDir;
+            
+            // Check for upcoming collision
+            const head = { x: player.x, y: player.y };
+            let futurePos = getFuturePosition(head, currentDir);
+            
+            if (checkCollisionAt(futurePos.x, futurePos.y)) {
+                // Collision imminent, find a new direction
+                const availableMoves = potentialMoves.filter(dir => {
+                    const future = getFuturePosition(head, dir);
+                    return !checkCollisionAt(future.x, future.y) && !isOppositeDirection(currentDir, dir);
+                });
+                
+                if (availableMoves.length > 0) {
+                    newDir = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                } else {
+                    // No safe moves, just turn to a non-opposite direction
+                    const nonOppositeMoves = potentialMoves.filter(dir => !isOppositeDirection(currentDir, dir));
+                    newDir = nonOppositeMoves[Math.floor(Math.random() * nonOppositeMoves.length)];
+                }
+            } else if (Math.random() < player.aggressiveness) {
+                // Aggressive behavior: try to cut off other players
+                let bestDir = null;
+                let maxDistance = 0;
+                
+                players.forEach(otherPlayer => {
+                    if (otherPlayer.id !== player.id && otherPlayer.path.length > 0) {
+                        const target = otherPlayer.path[otherPlayer.path.length - 1];
+                        potentialMoves.forEach(dir => {
+                            const future = getFuturePosition(head, dir);
+                            if (!checkCollisionAt(future.x, future.y) && !isOppositeDirection(currentDir, dir)) {
+                                const dist = Math.abs(future.x - target.x) + Math.abs(future.y - target.y);
+                                if (dist > maxDistance) {
+                                    maxDistance = dist;
+                                    bestDir = dir;
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                if (bestDir) {
+                    newDir = bestDir;
+                }
+            }
+            
+            player.direction = newDir;
+
+            // Move the AI
+            if (player.direction === 'up') player.y--;
+            else if (player.direction === 'down') player.y++;
+            else if (player.direction === 'left') player.x--;
+            else if (player.direction === 'right') player.x++;
+            
+            player.path.push({ x: player.x, y: player.y });
+            trails.push({ x: player.x, y: player.y });
+        }
+        
+        function isOppositeDirection(dir1, dir2) {
+            return (dir1 === 'up' && dir2 === 'down') ||
+                   (dir1 === 'down' && dir2 === 'up') ||
+                   (dir1 === 'left' && dir2 === 'right') ||
+                   (dir1 === 'right' && dir2 === 'left');
+        }
+
+        function getFuturePosition(pos, dir) {
+            const newPos = { ...pos };
+            if (dir === 'up') newPos.y--;
+            else if (dir === 'down') newPos.y++;
+            else if (dir === 'left') newPos.x--;
+            else if (dir === 'right') newPos.x++;
+            return newPos;
+        }
+
+        function checkCollision(player) {
+            // Check for wall collision
+            if (player.x < 0 || player.x >= width || player.y < 0 || player.y >= height) {
+                return true;
+            }
+
+            // Check for trail collision
+            for (let i = 0; i < trails.length; i++) {
+                if (player.x === trails[i].x && player.y === trails[i].y) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function checkCollisionAt(x, y) {
+            // Check for wall collision
+            if (x < 0 || x >= width || y < 0 || y >= height) {
+                return true;
+            }
+            
+            // Check for trail collision
+            for (let i = 0; i < trails.length; i++) {
+                if (x === trails[i].x && y === trails[i].y) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameLoop);
+            
+            if (gameMode === 'freeplay') {
+                gameOverText.textContent = `Game Over.`;
+                gameOverScreen.classList.remove('hidden');
+            } else { // Arcade mode
+                if (players.length > 1) {
+                    gameOverText.textContent = `Game Over! You survived ${currentRound} rounds.`;
+                    gameOverScreen.classList.remove('hidden');
+                } else {
+                    showRoundInfoScreen();
+                }
+            }
+        }
+        
+        function showRoundInfoScreen() {
+            roundTitle.textContent = `Round ${currentRound + 1}`;
+            if (currentRound > 0) {
+                roundStatus.textContent = `Difficulty is now: ${getDifficultyNameForArcade(currentRound + 1)}. Opponents: ${arcadeOpponents}`;
+            } else {
+                roundStatus.textContent = `Starting with 1 opponent...`;
+            }
+            roundInfoScreen.classList.remove('hidden');
+        }
+        
+        function getDifficultyNameForArcade(round) {
+            const difficultyLevels = ['Easy', 'Medium', 'Hard'];
+            const diffIndex = (round - 1) % difficultyLevels.length;
+            return difficultyLevels[diffIndex];
+        }
+    </script>
+</body>
+</html>

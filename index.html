@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Paranoids Labyrinth</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        body {
+            background-color: #000;
+            color: #00ffff;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align to the top to fit the game layout */
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-align: center;
+        }
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        #game-area {
+            flex: 1; /* Game canvas takes up 50% of screen height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        #game-container {
+            position: relative;
+            width: 95vmin;
+            height: 95vmin;
+            max-width: 600px;
+            max-height: 600px;
+            background: #000;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px #00ffff, 0 0 10px #00ffff inset;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
+        }
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .info-panel {
+            margin-top: 10px;
+            display: flex;
+            gap: 20px;
+            font-size: 1.2em;
+            text-shadow: 0 0 5px #00ffff;
+            justify-content: center;
+        }
+        #health-bar-container {
+            width: 150px;
+            height: 20px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            box-shadow: 0 0 5px #00ff00;
+            margin-left: 20px;
+        }
+        #health-bar {
+            height: 100%;
+            background-color: #00ff00;
+            transition: width 0.3s ease-in-out;
+        }
+        .game-controls {
+            flex: 1; /* Controls take up the bottom 50% of the screen */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        /* --- Game Boy Style Controls --- */
+        #gameboy-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 800px;
+        }
+        .d-pad {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left . right"
+                ". down .";
+            width: 150px;
+            height: 150px;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #00ffff;
+            padding: 10px;
+            position: relative;
+        }
+        .d-pad-button {
+            background-color: #555;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 5px #00ffff;
+        }
+        .d-pad-button:active {
+            background-color: #00ffff;
+            color: #000;
+            box-shadow: 0 0 10px #00ffff;
+            transform: scale(0.95);
+        }
+        .d-pad .up { grid-area: up; }
+        .d-pad .down { grid-area: down; }
+        .d-pad .left { grid-area: left; }
+        .d-pad .right { grid-area: right; }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .action-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #ff00ff;
+            color: #000;
+            border: 2px solid #ff00ff;
+            box-shadow: 0 0 10px #ff00ff;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        .action-button:active {
+            background-color: #00ffff;
+            color: #000;
+            box-shadow: 0 0 10px #00ffff;
+            transform: scale(0.95);
+        }
+
+        /* --- Pause Menu --- */
+        #pause-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px #00ffff;
+            display: none;
+            z-index: 200;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 300px;
+        }
+        #pause-menu h2 {
+            margin: 0;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+        .menu-option {
+            padding: 10px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1em;
+            color: #000;
+            background-color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px #00ffff;
+            transition: all 0.3s ease;
+        }
+        .menu-option:hover {
+            transform: scale(1.05);
+            background-color: #33ffff;
+            box-shadow: 0 0 20px #00ffff;
+        }
+        .menu-option:active {
+            transform: scale(1);
+            box-shadow: 0 0 5px #00ffff;
+        }
+        .control-sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: #00ffff;
+        }
+        .slider-group label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .slider-group input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            background: #555;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border: 2px solid #000;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slider-group input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #00ffff;
+            border: 2px solid #000;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Message Box from original code */
+        #message-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff00ff;
+            padding: 20px 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #ff00ff;
+            display: none;
+            z-index: 100;
+        }
+        #message-box h2 {
+            margin: 0 0 10px;
+            color: #ff00ff;
+        }
+        #message-box p {
+            margin: 0 0 20px;
+            font-size: 1.1em;
+        }
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <!-- Game Area (Top 50%) -->
+        <div id="game-area">
+            <div id="game-container">
+                <canvas id="game-canvas"></canvas>
+            </div>
+            <div id="pause-menu" style="display: none;">
+                <h2>Pause</h2>
+                <button id="resume-button" class="menu-option">Resume Game</button>
+                <button id="new-game-button" class="menu-option">New Game</button>
+                <div class="control-sliders">
+                    <div class="slider-group">
+                        <label for="control-size-slider">Control Size:</label>
+                        <input type="range" id="control-size-slider" min="50" max="150" value="100">
+                    </div>
+                </div>
+            </div>
+            <div id="message-box">
+                <h2 id="message-title">Game Over</h2>
+                <p id="message-text">Your final score is: <span id="final-score">0</span></p>
+                <button id="box-restart-button" class="menu-option">Play Again</button>
+            </div>
+        </div>
+
+        <!-- Controls Area (Bottom 50%) -->
+        <div class="game-controls">
+            <div id="gameboy-controls">
+                <!-- D-Pad -->
+                <div class="d-pad">
+                    <button class="d-pad-button up" data-direction="up">▲</button>
+                    <button class="d-pad-button down" data-direction="down">▼</button>
+                    <button class="d-pad-button left" data-direction="left">◄</button>
+                    <button class="d-pad-button right" data-direction="right">►</button>
+                </div>
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="action-button" id="fire-button">A</button>
+                    <button class="action-button" id="aim-button">B</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info and other elements -->
+        <div class="info-panel">
+            <p>Score: <span id="score-display">0</span></p>
+            <p>Enemies Left: <span id="enemies-display">3</span></p>
+            <p>Health: <div id="health-bar-container"><div id="health-bar"></div></div></p>
+        </div>
+        <div class="game-controls" style="margin-top: 20px;">
+            <button id="start-button" class="menu-option">Start Game</button>
+            <button id="pause-button" class="menu-option" style="display: none;">Pause</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score-display');
+        const enemiesDisplay = document.getElementById('enemies-display');
+        const startButton = document.getElementById('start-button');
+        const pauseButton = document.getElementById('pause-button');
+        const resumeButton = document.getElementById('resume-button');
+        const newGameButton = document.getElementById('new-game-button');
+        const messageBox = document.getElementById('message-box');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const boxRestartButton = document.getElementById('box-restart-button');
+        const healthBar = document.getElementById('health-bar');
+        const gameContainer = document.getElementById('game-container');
+        const pauseMenu = document.getElementById('pause-menu');
+        const dPad = document.querySelector('.d-pad');
+        const fireButton = document.getElementById('fire-button');
+        const aimButton = document.getElementById('aim-button');
+        const controlSizeSlider = document.getElementById('control-size-slider');
+        const gameboyControlsContainer = document.getElementById('gameboy-controls');
+
+        let isGameOver = true;
+        let isPaused = false;
+        let score = 0;
+        let animationFrameId;
+        let explosions = [];
+        let powerUps = [];
+        let lastPowerUpSpawn = 0;
+        let isTransitioningLevel = false;
+        let levelTimeoutId = null;
+        let playerDefaultColor = '#00ffff';
+        let playerIsFlashing = false;
+        let defaultBorderColor = '#00ffff';
+        let defaultBorderShadow = '0 0 20px #00ffff, 0 0 10px #00ffff inset';
+
+        // Maze dimensions
+        const MAZE_WIDTH = 13;
+        const MAZE_HEIGHT = 13;
+        let CELL_SIZE = 40;
+        let maze = [];
+
+        function generateMaze() {
+            maze = Array(MAZE_HEIGHT).fill(null).map(() => Array(MAZE_WIDTH).fill(1));
+            const stack = [];
+            const startX = Math.floor(Math.random() * MAZE_WIDTH);
+            const startY = Math.floor(Math.random() * MAZE_HEIGHT);
+            stack.push({ x: startX, y: startY });
+            maze[startY][startX] = 0;
+            const directions = [{x: 0, y: 1}, {x: 0, y: -1}, {x: 1, y: 0}, {x: -1, y: 0}];
+            while(stack.length > 0) {
+                const current = stack[stack.length - 1];
+                const neighbors = [];
+                directions.forEach(dir => {
+                    const nextX = current.x + dir.x * 2;
+                    const nextY = current.y + dir.y * 2;
+                    if (nextX >= 0 && nextX < MAZE_WIDTH && nextY >= 0 && nextY < MAZE_HEIGHT && maze[nextY][nextX] === 1) {
+                        neighbors.push({ x: nextX, y: nextY, dir: dir });
+                    }
+                });
+                if (neighbors.length > 0) {
+                    const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    maze[current.y + next.dir.y][current.x + next.dir.x] = 0;
+                    maze[next.y][next.x] = 0;
+                    stack.push({ x: next.x, y: next.y });
+                } else {
+                    stack.pop();
+                }
+            }
+        }
+
+        function drawMaze() {
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 10;
+            for (let y = 0; y < MAZE_HEIGHT; y++) {
+                for (let x = 0; x < MAZE_WIDTH; x++) {
+                    if (maze[y][x] === 1) {
+                        ctx.beginPath();
+                        ctx.rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        ctx.stroke();
+                    }
+                }
+            }
+            ctx.shadowBlur = 0;
+        }
+
+        // Player (Tank)
+        const player = {
+            x: 0,
+            y: 0,
+            size: 20,
+            baseSpeed: 3,
+            currentSpeed: 3,
+            baseFireRate: 300,
+            currentFireRate: 300,
+            health: 100,
+            maxHealth: 100,
+            color: playerDefaultColor,
+            velocity: { x: 0, y: 0 },
+            turretAngle: -Math.PI / 2,
+            draw: function() {
+                ctx.fillStyle = this.color;
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.rect(this.x, this.y, this.size, this.size);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.size / 2, this.y + this.size / 2);
+                const turretLength = this.size * 1.0;
+                const turretX = this.x + this.size / 2 + turretLength * Math.cos(this.turretAngle);
+                const turretY = this.y + this.size / 2 + turretLength * Math.sin(this.turretAngle);
+                ctx.lineTo(turretX, turretY);
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            },
+            update: function() {
+                const newX = this.x + this.velocity.x;
+                const newY = this.y + this.velocity.y;
+                if (!checkWallCollision(newX, newY, this.size)) {
+                    this.x = newX;
+                    this.y = newY;
+                }
+            }
+        };
+
+        function updateHealthBar() {
+            const healthPercentage = (player.health / player.maxHealth) * 100;
+            healthBar.style.width = `${healthPercentage}%`;
+            healthBar.style.backgroundColor = healthPercentage > 50 ? '#00ff00' : (healthPercentage > 25 ? '#ffff00' : '#ff0000');
+            healthBar.style.boxShadow = `0 0 5px ${healthBar.style.backgroundColor}`;
+        }
+
+        class Projectile {
+            constructor(x, y, vx, vy, color, target = 'enemy') {
+                this.x = x;
+                this.y = y;
+                this.size = 5;
+                this.vx = vx;
+                this.vy = vy;
+                this.color = color;
+                this.target = target;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+        }
+
+        let projectiles = [];
+        let enemyProjectiles = [];
+        let powerUpSpawnTimer = 0;
+        let powerUpSpawnInterval = 5000;
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.size = 15;
+                this.type = type;
+                this.color = '';
+                this.duration = 5000;
+                if (type === 'health') this.color = '#00ff00';
+                if (type === 'speed') this.color = '#ffff00';
+                if (type === 'fireRate') this.color = '#ff00ff';
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function spawnPowerUp() {
+            const powerUpTypes = ['health', 'speed', 'fireRate'];
+            const type = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+            let placed = false;
+            let attempts = 0;
+            while(!placed && attempts < 100) {
+                const x = Math.floor(Math.random() * MAZE_WIDTH);
+                const y = Math.floor(Math.random() * MAZE_HEIGHT);
+                if (maze[y][x] === 0) {
+                    const powerUp = new PowerUp(
+                        x * CELL_SIZE + (CELL_SIZE - 15) / 2,
+                        y * CELL_SIZE + (CELL_SIZE - 15) / 2,
+                        type
+                    );
+                    powerUps.push(powerUp);
+                    placed = true;
+                }
+                attempts++;
+            }
+        }
+
+        class Enemy {
+            constructor() {
+                this.size = 20;
+                this.x = 0;
+                this.y = 0;
+                this.speed = 2;
+                this.color = '#ff9900';
+                this.lastShot = Date.now();
+                this.fireRate = 2000;
+                this.vx = (Math.random() < 0.5 ? 1 : -1) * this.speed;
+                this.vy = (Math.random() < 0.5 ? 1 : -1) * this.speed;
+            }
+            draw() {
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.rect(this.x, this.y, this.size, this.size);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.size / 2, this.y + this.size / 2);
+                ctx.lineTo(this.x + this.size / 2, this.y + this.size);
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+            update() {
+                const newX = this.x + this.vx;
+                const newY = this.y + this.vy;
+                if (checkWallCollision(newX, newY, this.size)) {
+                    const directions = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
+                    directions.sort(() => Math.random() - 0.5);
+                    let foundNewPath = false;
+                    for (const dir of directions) {
+                        const testX = this.x + dir.x * CELL_SIZE;
+                        const testY = this.y + dir.y * CELL_SIZE;
+                        if (!checkWallCollision(testX, testY, this.size)) {
+                            this.vx = dir.x * this.speed;
+                            this.vy = dir.y * this.speed;
+                            foundNewPath = true;
+                            break;
+                        }
+                    }
+                    if (!foundNewPath) {
+                        this.vx = -this.vx;
+                        this.vy = -this.vy;
+                    }
+                } else {
+                    this.x = newX;
+                    this.y = newY;
+                }
+                if (Math.random() < 0.005) {
+                    const directions = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
+                    const newDir = directions[Math.floor(Math.random() * directions.length)];
+                    this.vx = newDir.x * this.speed;
+                    this.vy = newDir.y * newDir.y * this.speed;
+                }
+            }
+            shoot() {
+                if (Date.now() - this.lastShot > this.fireRate) {
+                    enemyProjectiles.push(new Projectile(
+                        this.x + this.size / 2,
+                        this.y + this.size,
+                        0,
+                        3,
+                        '#ff0000',
+                        'player'
+                    ));
+                    this.lastShot = Date.now();
+                }
+            }
+        }
+
+        let enemies = [];
+
+        class Explosion {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.particles = [];
+                for (let i = 0; i < 10; i++) {
+                    this.particles.push({
+                        x: 0,
+                        y: 0,
+                        radius: Math.random() * 2 + 1,
+                        velocity: {
+                            x: (Math.random() - 0.5) * 5,
+                            y: (Math.random() - 0.5) * 5
+                        },
+                        alpha: 1
+                    });
+                }
+            }
+            draw() {
+                this.particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(this.x + p.x, this.y + p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${parseInt(this.color.slice(1,3), 16)}, ${parseInt(this.color.slice(3,5), 16)}, ${parseInt(this.color.slice(5,7), 16)}, ${p.alpha})`;
+                    ctx.fill();
+                });
+            }
+            update() {
+                this.particles.forEach(p => {
+                    p.x += p.velocity.x;
+                    p.y += p.velocity.y;
+                    p.alpha -= 0.05;
+                });
+                return this.particles.every(p => p.alpha <= 0);
+            }
+        }
+        function checkCollision(obj1, obj2) {
+            const dx = obj1.x - obj2.x;
+            const dy = obj1.y - obj2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < (obj1.size + obj2.size) / 2;
+        }
+
+        function checkWallCollision(x, y, size) {
+            const playerGridX = Math.floor(x / CELL_SIZE);
+            const playerGridY = Math.floor(y / CELL_SIZE);
+            const playerGridX2 = Math.floor((x + size) / CELL_SIZE);
+            const playerGridY2 = Math.floor((y + size) / CELL_SIZE);
+            if (playerGridX < 0 || playerGridX >= MAZE_WIDTH ||
+                playerGridY < 0 || playerGridY >= MAZE_HEIGHT ||
+                playerGridX2 < 0 || playerGridX2 >= MAZE_WIDTH ||
+                playerGridY2 < 0 || playerGridY2 >= MAZE_HEIGHT) {
+                return true;
+            }
+            if (maze[playerGridY][playerGridX] === 1 ||
+                maze[playerGridY][playerGridX2] === 1 ||
+                maze[playerGridY2][playerGridX] === 1 ||
+                maze[playerGridY2][playerGridX2] === 1) {
+                return true;
+            }
+            return false;
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            cancelAnimationFrame(animationFrameId);
+            finalScoreDisplay.textContent = score;
+            document.getElementById('message-title').textContent = 'Game Over';
+            document.getElementById('message-text').style.display = 'block';
+            boxRestartButton.style.display = 'block';
+            messageBox.style.display = 'block';
+            pauseButton.style.display = 'none';
+        }
+
+        function winLevel() {
+            isTransitioningLevel = true;
+            cancelAnimationFrame(animationFrameId);
+            score += 75;
+            scoreDisplay.textContent = score;
+            document.getElementById('message-title').textContent = 'Level Complete!';
+            document.getElementById('message-text').textContent = `Your current score is: ${score}`;
+            boxRestartButton.style.display = 'none';
+            messageBox.style.display = 'block';
+            levelTimeoutId = setTimeout(() => {
+                startNewLevel();
+            }, 2000);
+        }
+
+        let powerUpEffectTimeoutId = null;
+        function applyPowerUpEffect(color, duration) {
+            if (powerUpEffectTimeoutId) {
+                clearTimeout(powerUpEffectTimeoutId);
+            }
+            gameContainer.style.boxShadow = `0 0 20px ${color}, 0 0 10px ${color} inset`;
+            gameContainer.style.borderColor = color;
+            powerUpEffectTimeoutId = setTimeout(() => {
+                gameContainer.style.boxShadow = defaultBorderShadow;
+                gameContainer.style.borderColor = defaultBorderColor;
+            }, duration);
+        }
+
+        function flashPlayerRed() {
+            if (playerIsFlashing) return;
+            playerIsFlashing = true;
+            player.color = '#ff0000';
+            gameContainer.style.boxShadow = `0 0 20px #ff0000, 0 0 10px #ff0000 inset`;
+            gameContainer.style.borderColor = '#ff0000';
+            setTimeout(() => {
+                player.color = playerDefaultColor;
+                gameContainer.style.boxShadow = defaultBorderShadow;
+                gameContainer.style.borderColor = defaultBorderColor;
+                playerIsFlashing = false;
+            }, 500);
+        }
+
+        function gameLoop() {
+            if (isGameOver || isTransitioningLevel || isPaused) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawMaze();
+            powerUpSpawnTimer++;
+            if (powerUpSpawnTimer > 600) {
+                spawnPowerUp();
+                powerUpSpawnTimer = 0;
+            }
+            powerUps.forEach(p => p.draw());
+            updatePlayerMovement();
+            player.update();
+            player.draw();
+            enemies.forEach((enemy, enemyIndex) => {
+                enemy.update();
+                enemy.draw();
+                enemy.shoot();
+                projectiles.forEach((projectile, projIndex) => {
+                    if (checkCollision(projectile, enemy)) {
+                        explosions.push(new Explosion(enemy.x + enemy.size/2, enemy.y + enemy.size/2, enemy.color));
+                        enemies.splice(enemyIndex, 1);
+                        projectiles.splice(projIndex, 1);
+                        score += 10;
+                        scoreDisplay.textContent = score;
+                        enemiesDisplay.textContent = enemies.length;
+                    }
+                });
+            });
+
+            powerUps.forEach((p, index) => {
+                if (checkCollision(player, p)) {
+                    applyPowerUpEffect(p.color, p.duration);
+                    if (p.type === 'health') {
+                        player.health = Math.min(player.health + 25, player.maxHealth);
+                        updateHealthBar();
+                    } else if (p.type === 'speed') {
+                        player.currentSpeed = player.baseSpeed * 1.5;
+                        setTimeout(() => player.currentSpeed = player.baseSpeed, p.duration);
+                    } else if (p.type === 'fireRate') {
+                        player.currentFireRate = player.baseFireRate * 0.5;
+                        setTimeout(() => player.currentFireRate = player.baseFireRate, p.duration);
+                    }
+                    powerUps.splice(index, 1);
+                }
+            });
+
+            projectiles.forEach((projectile, projIndex) => {
+                projectile.update();
+                projectile.draw();
+                if (checkWallCollision(projectile.x, projectile.y, projectile.size) || projectile.y < -projectile.size || projectile.x < -projectile.size || projectile.x > canvas.width + projectile.size) {
+                    projectiles.splice(projIndex, 1);
+                }
+            });
+
+            enemyProjectiles.forEach((projectile, projIndex) => {
+                projectile.update();
+                projectile.draw();
+                if (checkCollision(projectile, player)) {
+                    explosions.push(new Explosion(projectile.x, projectile.y, projectile.color));
+                    enemyProjectiles.splice(projIndex, 1);
+                    player.health -= 25;
+                    updateHealthBar();
+                    flashPlayerRed();
+                    if (player.health <= 0) {
+                        gameOver();
+                    }
+                }
+                if (checkWallCollision(projectile.x, projectile.y, projectile.size) || projectile.y > canvas.height + projectile.size) {
+                    enemyProjectiles.splice(projIndex, 1);
+                }
+            });
+
+            for (let i = explosions.length - 1; i >= 0; i--) {
+                const explosion = explosions[i];
+                explosion.draw();
+                if (explosion.update()) {
+                    explosions.splice(i, 1);
+                }
+            }
+
+            if (enemies.length === 0) {
+                winLevel();
+            }
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        const keys = {};
+        let isAiming = false;
+        let isShooting = false;
+        let lastPlayerShot = Date.now();
+        const dpadDirections = {
+            'up': 'ArrowUp',
+            'down': 'ArrowDown',
+            'left': 'ArrowLeft',
+            'right': 'ArrowRight'
+        };
+
+        // Keyboard event listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
+                togglePause();
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Touch/Mouse event listeners for new controls
+        dPad.querySelectorAll('.d-pad-button').forEach(button => {
+            const direction = dpadDirections[button.dataset.direction];
+            button.addEventListener('mousedown', () => keys[direction] = true);
+            button.addEventListener('mouseup', () => keys[direction] = false);
+            button.addEventListener('mouseleave', () => keys[direction] = false);
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[direction] = true;
+            });
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[direction] = false;
+            });
+        });
+
+        fireButton.addEventListener('mousedown', () => isShooting = true);
+        fireButton.addEventListener('mouseup', () => isShooting = false);
+        fireButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isShooting = true;
+        });
+        fireButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isShooting = false;
+        });
+
+        aimButton.addEventListener('mousedown', () => isAiming = true);
+        aimButton.addEventListener('mouseup', () => isAiming = false);
+        aimButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isAiming = true;
+        });
+        aimButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isAiming = false;
+        });
+
+        // Update player movement and actions based on keys and touch controls
+        function updatePlayerMovement() {
+            player.velocity.x = 0;
+            player.velocity.y = 0;
+            if (keys['ArrowUp'] || keys['w']) player.velocity.y = -player.currentSpeed;
+            if (keys['ArrowDown'] || keys['s']) player.velocity.y = player.currentSpeed;
+            if (keys['ArrowLeft'] || keys['a']) player.velocity.x = -player.currentSpeed;
+            if (keys['ArrowRight'] || keys['d']) player.velocity.x = player.currentSpeed;
+
+            // Turret aiming with 'B' button (aimButton)
+            if (isAiming) {
+                if (keys['ArrowUp'] || keys['w']) player.turretAngle = -Math.PI / 2;
+                if (keys['ArrowDown'] || keys['s']) player.turretAngle = Math.PI / 2;
+                if (keys['ArrowLeft'] || keys['a']) player.turretAngle = Math.PI;
+                if (keys['ArrowRight'] || keys['d']) player.turretAngle = 0;
+            } else {
+                // If not aiming, turret aligns with movement
+                if (player.velocity.x === 0 && player.velocity.y < 0) player.turretAngle = -Math.PI / 2;
+                else if (player.velocity.x === 0 && player.velocity.y > 0) player.turretAngle = Math.PI / 2;
+                else if (player.velocity.x < 0 && player.velocity.y === 0) player.turretAngle = Math.PI;
+                else if (player.velocity.x > 0 && player.velocity.y === 0) player.turretAngle = 0;
+            }
+
+            // Shooting with 'A' button (fireButton)
+            if (isShooting && Date.now() - lastPlayerShot > player.currentFireRate) {
+                const projectileSpeed = 7;
+                projectiles.push(new Projectile(
+                    player.x + player.size / 2,
+                    player.y + player.size / 2,
+                    projectileSpeed * Math.cos(player.turretAngle),
+                    projectileSpeed * Math.sin(player.turretAngle),
+                    '#00ffff'
+                ));
+                lastPlayerShot = Date.now();
+            }
+        }
+
+        function resizeCanvas() {
+            canvas.width = gameContainer.clientWidth;
+            canvas.height = gameContainer.clientHeight;
+            CELL_SIZE = Math.floor(Math.min(canvas.width / MAZE_WIDTH, canvas.height / MAZE_HEIGHT));
+            player.size = CELL_SIZE * 0.4;
+            // Reposition player after resize to prevent being stuck in walls
+            let placed = false;
+            for (let y = 0; y < MAZE_HEIGHT && !placed; y++) {
+                for (let x = 0; x < MAZE_WIDTH; x++) {
+                    if (maze[y][x] === 0) {
+                        player.x = x * CELL_SIZE + (CELL_SIZE - player.size) / 2;
+                        player.y = y * CELL_SIZE + (CELL_SIZE - player.size) / 2;
+                        placed = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function spawnEnemies() {
+            const numEnemies = Math.min(5, Math.floor(MAZE_WIDTH * MAZE_HEIGHT / 20));
+            enemies = [];
+            let placed = 0;
+            while (placed < numEnemies) {
+                const x = Math.floor(Math.random() * MAZE_WIDTH);
+                const y = Math.floor(Math.random() * MAZE_HEIGHT);
+                const enemy = new Enemy();
+                enemy.x = x * CELL_SIZE + (CELL_SIZE - enemy.size) / 2;
+                enemy.y = y * CELL_SIZE + (CELL_SIZE - enemy.size) / 2;
+                const dx = enemy.x - player.x;
+                const dy = enemy.y - player.y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                if (maze[y][x] === 0 && distance > 200) {
+                    enemies.push(enemy);
+                    placed++;
+                }
+            }
+            enemiesDisplay.textContent = enemies.length;
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                cancelAnimationFrame(animationFrameId);
+                pauseMenu.style.display = 'flex';
+                pauseButton.textContent = 'Resume';
+            } else {
+                pauseMenu.style.display = 'none';
+                pauseButton.textContent = 'Pause';
+                gameLoop();
+            }
+        }
+
+        function startGame() {
+            if (levelTimeoutId) {
+                clearTimeout(levelTimeoutId);
+                levelTimeoutId = null;
+            }
+            isGameOver = false;
+            isPaused = false;
+            score = 0;
+            isTransitioningLevel = false;
+            projectiles = [];
+            enemyProjectiles = [];
+            explosions = [];
+            powerUps = [];
+            player.health = player.maxHealth;
+            player.currentSpeed = player.baseSpeed;
+            player.currentFireRate = player.baseFireRate;
+            scoreDisplay.textContent = score;
+            messageBox.style.display = 'none';
+            pauseMenu.style.display = 'none';
+            startButton.style.display = 'none';
+            pauseButton.style.display = 'block';
+            pauseButton.textContent = 'Pause';
+            updateHealthBar();
+            generateMaze();
+            resizeCanvas();
+            spawnEnemies();
+            spawnPowerUp();
+            if (powerUpEffectTimeoutId) {
+                clearTimeout(powerUpEffectTimeoutId);
+            }
+            gameContainer.style.boxShadow = defaultBorderShadow;
+            gameContainer.style.borderColor = defaultBorderColor;
+            gameLoop();
+        }
+
+        function startNewLevel() {
+            isTransitioningLevel = false;
+            messageBox.style.display = 'none';
+            projectiles = [];
+            enemyProjectiles = [];
+            explosions = [];
+            powerUps = [];
+            player.currentSpeed = player.baseSpeed;
+            player.currentFireRate = player.baseFireRate;
+            scoreDisplay.textContent = score;
+            enemiesDisplay.textContent = enemies.length;
+            updateHealthBar();
+            if (powerUpEffectTimeoutId) {
+                clearTimeout(powerUpEffectTimeoutId);
+            }
+            gameContainer.style.boxShadow = defaultBorderShadow;
+            gameContainer.style.borderColor = defaultBorderColor;
+            generateMaze();
+            resizeCanvas();
+            spawnEnemies();
+            spawnPowerUp();
+            gameLoop();
+        }
+
+        startButton.addEventListener('click', startGame);
+        pauseButton.addEventListener('click', togglePause);
+        resumeButton.addEventListener('click', togglePause);
+        newGameButton.addEventListener('click', startGame);
+        boxRestartButton.addEventListener('click', startGame);
+
+        // Control size slider
+        controlSizeSlider.addEventListener('input', (e) => {
+            const size = e.target.value;
+            gameboyControlsContainer.style.transform = `scale(${size / 100})`;
+        });
+
+        window.onload = function() {
+            generateMaze();
+            resizeCanvas();
+            player.x = (canvas.width / 2) - (player.size / 2);
+            player.y = canvas.height - 50;
+            updateHealthBar();
+        };
+    </script>
+</body>
+</html>

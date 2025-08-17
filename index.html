@@ -30,8 +30,7 @@
             width: 100%;
             max-width: 650px;
             height: 100%;
-            gap: 20px;
-            position: relative; /* Make it the positioning context for the draggable controls */
+            position: relative;
         }
 
         /* Game Container */
@@ -47,7 +46,7 @@
             border-radius: 10px;
             overflow: hidden;
             transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
-            margin-bottom: 0;
+            margin-bottom: 2vmin;
         }
 
         #game-canvas {
@@ -63,7 +62,7 @@
             flex-direction: column;
             align-items: center;
             padding: 1vmin 0;
-            margin-bottom: 0;
+            margin-bottom: 2vmin; /* Increased spacing */
         }
         .info-panel {
             display: flex;
@@ -72,7 +71,6 @@
             font-size: 2.5vmin;
             text-shadow: 0 0 5px #00ffff;
             justify-content: center;
-            margin-bottom: 0;
         }
         #health-bar-container {
             width: 15vmin;
@@ -89,30 +87,52 @@
         }
 
         /* Controls */
-        #controls-container {
-            padding: 2vmin;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2vmin;
-            position: absolute; /* Allow it to be positioned freely */
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
+        .menu-option {
+            padding: 1.5vmin 3vmin;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5vmin;
+            color: #000;
+            background-color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px #00ffff;
+            transition: all 0.3s ease;
         }
+        .menu-option:hover {
+            transform: scale(1.05);
+            background-color: #33ffff;
+            box-shadow: 0 0 20px #00ffff;
+        }
+        .menu-option:active {
+            transform: scale(1);
+            box-shadow: 0 0 5px #00ffff;
+        }
+        .button-group {
+            display: flex;
+            gap: 2vmin;
+            justify-content: center;
+            margin-top: 1vmin;
+            margin-bottom: 2vmin; /* Spacing below the start button */
+        }
+
+        /* Draggable Controls */
         #gameboy-controls {
             display: flex;
             align-items: center;
-            justify-content: space-around;
+            justify-content: center;
             width: 100%;
             max-width: 800px;
             transform: scale(1.0);
             transition: transform 0.2s ease-in-out;
             cursor: grab;
-            position: relative; /* Allows child controls to be positioned */
+            position: absolute; /* Allows for drag and drop positioning */
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            touch-action: none; /* Prevents browser default touch behavior */
         }
         .d-pad {
             display: grid;
@@ -178,35 +198,6 @@
             color: #000;
             box-shadow: 0 0 10px #00ffff;
             transform: scale(0.95);
-        }
-
-        .menu-option {
-            padding: 1.5vmin 3vmin;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5vmin;
-            color: #000;
-            background-color: #00ffff;
-            border: 2px solid #00ffff;
-            border-radius: 8px;
-            cursor: pointer;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 10px #00ffff;
-            transition: all 0.3s ease;
-        }
-        .menu-option:hover {
-            transform: scale(1.05);
-            background-color: #33ffff;
-            box-shadow: 0 0 20px #00ffff;
-        }
-        .menu-option:active {
-            transform: scale(1);
-            box-shadow: 0 0 5px #00ffff;
-        }
-        .button-group {
-            display: flex;
-            gap: 2vmin;
-            justify-content: center;
-            margin-top: 1vmin;
         }
 
         /* Pause Menu and Message Box */
@@ -309,25 +300,25 @@
                 <p>Health: <div id="health-bar-container"><div id="health-bar"></div></div></p>
             </div>
         </div>
+        
+        <!-- Start/Pause Button -->
+        <div class="button-group">
+            <button id="start-pause-button" class="menu-option">Start Game</button>
+        </div>
 
-        <!-- Controls Area -->
-        <div id="controls-container">
-            <div class="button-group">
-                <button id="start-pause-button" class="menu-option">Start Game</button>
+        <!-- Draggable Controls Area -->
+        <div id="gameboy-controls">
+            <!-- D-Pad -->
+            <div class="d-pad">
+                <button class="d-pad-button up" data-direction="up">▲</button>
+                <button class="d-pad-button down" data-direction="down">▼</button>
+                <button class="d-pad-button left" data-direction="left">◄</button>
+                <button class="d-pad-button right" data-direction="right">►</button>
             </div>
-            <div id="gameboy-controls">
-                <!-- D-Pad -->
-                <div class="d-pad">
-                    <button class="d-pad-button up" data-direction="up">▲</button>
-                    <button class="d-pad-button down" data-direction="down">▼</button>
-                    <button class="d-pad-button left" data-direction="left">◄</button>
-                    <button class="d-pad-button right" data-direction="right">►</button>
-                </div>
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button class="action-button" id="fire-button">A</button>
-                    <button class="action-button" id="aim-button">B</button>
-                </div>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-button" id="fire-button">A</button>
+                <button class="action-button" id="aim-button">B</button>
             </div>
         </div>
     </div>
@@ -553,12 +544,12 @@
                 this.size = 20;
                 this.x = 0;
                 this.y = 0;
-                this.speed = 1.2;
+                this.speed = 0.8; // Reduced speed to make tanks slower
                 this.color = '#ff9900';
                 this.lastShot = Date.now();
                 this.fireRate = 2000;
                 this.changeDirectionCounter = 0;
-                this.changeDirectionThreshold = 100; // frames
+                this.changeDirectionThreshold = 100;
                 this.changeDirection();
             }
             draw() {
@@ -599,14 +590,14 @@
                 if (nextWallX) {
                     this.vx = -this.vx;
                     this.x += this.vx;
-                    this.changeDirection(); // Force a change
+                    this.changeDirection();
                 } else {
                     this.x = newX;
                 }
                 if (nextWallY) {
                     this.vy = -this.vy;
                     this.y += this.vy;
-                    this.changeDirection(); // Force a change
+                    this.changeDirection();
                 } else {
                     this.y = newY;
                 }
@@ -701,7 +692,6 @@
             document.getElementById('message-text').style.display = 'block';
             boxRestartButton.style.display = 'block';
             messageBox.style.display = 'flex';
-            startPauseButton.style.display = 'block';
             startPauseButton.textContent = 'Start Game';
         }
 
@@ -944,7 +934,6 @@
 
         function startDrag(e) {
             isDragging = true;
-            // Get initial position and offset
             const rect = gameboyControlsContainer.getBoundingClientRect();
             let clientX, clientY;
             if (e.type.startsWith('touch')) {
@@ -977,17 +966,19 @@
             const mainContainer = document.getElementById('main-game-container');
             const mainRect = mainContainer.getBoundingClientRect();
 
-            let newLeft = clientX - dragOffsetX;
-            let newTop = clientY - dragOffsetY;
+            let newLeft = clientX - mainRect.left - dragOffsetX;
+            let newTop = clientY - mainRect.top - dragOffsetY;
 
             // Clamp the position to stay within the main game container
-            newLeft = Math.max(mainRect.left, newLeft);
-            newLeft = Math.min(mainRect.right - gameboyControlsContainer.offsetWidth, newLeft);
-            newTop = Math.max(mainRect.top, newTop);
-            newTop = Math.min(mainRect.bottom - gameboyControlsContainer.offsetHeight, newTop);
+            newLeft = Math.max(0, newLeft);
+            newLeft = Math.min(mainRect.width - gameboyControlsContainer.offsetWidth, newLeft);
+            newTop = Math.max(0, newTop);
+            newTop = Math.min(mainRect.height - gameboyControlsContainer.offsetHeight, newTop);
 
-            gameboyControlsContainer.style.left = `${newLeft - mainRect.left}px`;
-            gameboyControlsContainer.style.top = `${newTop - mainRect.top}px`;
+            gameboyControlsContainer.style.left = `${newLeft}px`;
+            gameboyControlsContainer.style.top = `${newTop}px`;
+            gameboyControlsContainer.style.right = 'auto'; // Reset right and bottom
+            gameboyControlsContainer.style.bottom = 'auto';
             gameboyControlsContainer.style.transform = 'none'; // Clear the transform for dragging
             e.preventDefault();
         }

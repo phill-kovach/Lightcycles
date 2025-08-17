@@ -18,15 +18,17 @@
             margin: 0;
             overflow: hidden;
             text-align: center;
-            padding: 10px; /* Added padding to ensure no content is off-screen */
-            box-sizing: border-box; /* Ensures padding is included in the element's total width and height */
+            padding: 1vmin;
+            box-sizing: border-box;
         }
 
         #main-game-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
             width: 100%;
+            max-width: 650px;
             height: 100%;
         }
 
@@ -43,7 +45,7 @@
             border-radius: 10px;
             overflow: hidden;
             transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
-            margin-bottom: 20px; /* Space between canvas and info */
+            margin-bottom: 2vmin;
         }
 
         #game-canvas {
@@ -58,24 +60,24 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 0;
-            margin-bottom: 20px; /* Space between info and controls */
+            padding: 1vmin 0;
         }
         .info-panel {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
-            font-size: 1.2em;
+            gap: 2vmin;
+            font-size: 2.5vmin; /* Adjusted font size */
             text-shadow: 0 0 5px #00ffff;
             justify-content: center;
+            margin-bottom: 2vmin;
         }
         #health-bar-container {
-            width: 150px;
-            height: 20px;
+            width: 15vmin; /* Adjusted width */
+            height: 2vmin; /* Adjusted height */
             border: 2px solid #00ff00;
             border-radius: 5px;
             box-shadow: 0 0 5px #00ff00;
-            margin-left: 20px;
+            margin-left: 2vmin;
         }
         #health-bar {
             height: 100%;
@@ -85,11 +87,13 @@
 
         /* Controls */
         #controls-container {
-            padding: 10px;
+            padding: 2vmin;
             width: 100%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 2vmin;
         }
         #gameboy-controls {
             display: flex;
@@ -97,7 +101,8 @@
             justify-content: space-around;
             width: 100%;
             max-width: 800px;
-            transform: scale(1.1); /* Default 10% larger */
+            transform: scale(1.0); /* Adjusted default scale */
+            transition: transform 0.2s ease-in-out;
         }
         .d-pad {
             display: grid;
@@ -105,12 +110,12 @@
                 ". up ."
                 "left . right"
                 ". down .";
-            width: 150px;
-            height: 150px;
+            width: 15vmin;
+            height: 15vmin;
             background: #222;
             border-radius: 10px;
             box-shadow: 0 0 10px #00ffff;
-            padding: 10px;
+            padding: 1vmin;
             position: relative;
         }
         .d-pad-button {
@@ -118,7 +123,7 @@
             color: #00ffff;
             border: 2px solid #00ffff;
             border-radius: 5px;
-            font-size: 1.5em;
+            font-size: 2.5vmin; /* Adjusted font size */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -139,17 +144,18 @@
         .action-buttons {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 2vmin; /* Adjusted gap */
+            margin-left: 2vmin; /* Adjusted margin */
         }
         .action-button {
-            width: 80px;
-            height: 80px;
+            width: 8vmin; /* Adjusted width */
+            height: 8vmin; /* Adjusted height */
             border-radius: 50%;
             background-color: #ff00ff;
             color: #000;
             border: 2px solid #ff00ff;
             box-shadow: 0 0 10px #ff00ff;
-            font-size: 1.5em;
+            font-size: 2.5vmin; /* Adjusted font size */
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -165,9 +171,9 @@
         }
 
         .menu-option {
-            padding: 10px 20px;
+            padding: 1.5vmin 3vmin; /* Adjusted padding */
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.1em;
+            font-size: 2.5vmin; /* Adjusted font size */
             color: #000;
             background-color: #00ffff;
             border: 2px solid #00ffff;
@@ -188,9 +194,9 @@
         }
         .button-group {
             display: flex;
-            gap: 20px;
+            gap: 2vmin;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 1vmin;
         }
 
         /* Pause Menu and Message Box */
@@ -201,24 +207,25 @@
             transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85);
             border: 2px solid #00ffff;
-            padding: 30px;
+            padding: 3vmin;
             border-radius: 15px;
             box-shadow: 0 0 25px #00ffff;
             display: none;
             z-index: 200;
             flex-direction: column;
-            gap: 20px;
-            min-width: 300px;
+            gap: 2vmin;
+            min-width: 30vmin;
         }
         #pause-menu h2, #message-box h2 {
             margin: 0;
             color: #00ffff;
             text-shadow: 0 0 5px #00ffff;
+            font-size: 4vmin; /* Adjusted font size */
         }
         .control-sliders {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 2vmin;
         }
         .slider-group {
             display: flex;
@@ -227,13 +234,13 @@
             color: #00ffff;
         }
         .slider-group label {
-            font-size: 0.9em;
-            margin-bottom: 5px;
+            font-size: 2vmin; /* Adjusted font size */
+            margin-bottom: 1vmin;
         }
         .slider-group input[type="range"] {
             width: 100%;
             -webkit-appearance: none;
-            height: 8px;
+            height: 1vmin;
             background: #555;
             border-radius: 5px;
             outline: none;
@@ -243,16 +250,16 @@
         .slider-group input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 2.5vmin;
+            height: 2.5vmin;
             background: #00ffff;
             border: 2px solid #000;
             border-radius: 50%;
             cursor: pointer;
         }
         .slider-group input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 2.5vmin;
+            height: 2.5vmin;
             background: #00ffff;
             border: 2px solid #000;
             border-radius: 50%;
@@ -273,7 +280,7 @@
                 <div class="control-sliders">
                     <div class="slider-group">
                         <label for="control-size-slider">Control Size:</label>
-                        <input type="range" id="control-size-slider" min="50" max="150" value="110">
+                        <input type="range" id="control-size-slider" min="50" max="150" value="100">
                     </div>
                 </div>
             </div>
@@ -291,14 +298,13 @@
                 <p>Enemies Left: <span id="enemies-display">3</span></p>
                 <p>Health: <div id="health-bar-container"><div id="health-bar"></div></div></p>
             </div>
-            <div class="button-group">
-                <button id="start-button" class="menu-option">Start Game</button>
-                <button id="pause-button" class="menu-option" style="display: none;">Pause</button>
-            </div>
         </div>
 
         <!-- Controls Area -->
         <div id="controls-container">
+             <div class="button-group">
+                <button id="start-pause-button" class="menu-option">Start Game</button>
+            </div>
             <div id="gameboy-controls">
                 <!-- D-Pad -->
                 <div class="d-pad">
@@ -321,8 +327,7 @@
         const ctx = canvas.getContext('2d');
         const scoreDisplay = document.getElementById('score-display');
         const enemiesDisplay = document.getElementById('enemies-display');
-        const startButton = document.getElementById('start-button');
-        const pauseButton = document.getElementById('pause-button');
+        const startPauseButton = document.getElementById('start-pause-button');
         const resumeButton = document.getElementById('resume-button');
         const newGameButton = document.getElementById('new-game-button');
         const messageBox = document.getElementById('message-box');
@@ -676,8 +681,8 @@
             document.getElementById('message-text').style.display = 'block';
             boxRestartButton.style.display = 'block';
             messageBox.style.display = 'flex';
-            pauseButton.style.display = 'none';
-            startButton.style.display = 'block';
+            startPauseButton.style.display = 'block';
+            startPauseButton.textContent = 'Start Game';
         }
 
         function winLevel() {
@@ -954,10 +959,10 @@
             if (isPaused) {
                 cancelAnimationFrame(animationFrameId);
                 pauseMenu.style.display = 'flex';
-                pauseButton.textContent = 'Resume';
+                startPauseButton.textContent = 'Resume Game';
             } else {
                 pauseMenu.style.display = 'none';
-                pauseButton.textContent = 'Pause';
+                startPauseButton.textContent = 'Pause Game';
                 gameLoop();
             }
         }
@@ -981,9 +986,7 @@
             scoreDisplay.textContent = score;
             messageBox.style.display = 'none';
             pauseMenu.style.display = 'none';
-            startButton.style.display = 'none';
-            pauseButton.style.display = 'block';
-            pauseButton.textContent = 'Pause';
+            startPauseButton.textContent = 'Pause Game';
             updateHealthBar();
             generateMaze();
             resizeCanvas();
@@ -1022,8 +1025,13 @@
             gameLoop();
         }
 
-        startButton.addEventListener('click', startGame);
-        pauseButton.addEventListener('click', togglePause);
+        startPauseButton.addEventListener('click', () => {
+            if (isGameOver) {
+                startGame();
+            } else {
+                togglePause();
+            }
+        });
         resumeButton.addEventListener('click', togglePause);
         newGameButton.addEventListener('click', startGame);
         boxRestartButton.addEventListener('click', startGame);
@@ -1039,7 +1047,6 @@
             player.x = (canvas.width / 2) - (player.size / 2);
             player.y = canvas.height - 50;
             updateHealthBar();
-            // Apply default scale on load
             gameboyControlsContainer.style.transform = `scale(${controlSizeSlider.value / 100})`;
         };
     </script>

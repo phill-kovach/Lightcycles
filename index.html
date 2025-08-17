@@ -26,11 +26,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Changed to flex-start for tighter spacing */
+            justify-content: flex-start;
             width: 100%;
             max-width: 650px;
             height: 100%;
-            gap: 20px; /* Added a gap for consistent spacing */
+            gap: 20px;
+            position: relative; /* Make it the positioning context for the draggable controls */
         }
 
         /* Game Container */
@@ -46,7 +47,7 @@
             border-radius: 10px;
             overflow: hidden;
             transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
-            margin-bottom: 0; /* Adjusted margin */
+            margin-bottom: 0;
         }
 
         #game-canvas {
@@ -62,20 +63,20 @@
             flex-direction: column;
             align-items: center;
             padding: 1vmin 0;
-            margin-bottom: 0; /* Adjusted margin */
+            margin-bottom: 0;
         }
         .info-panel {
             display: flex;
             flex-wrap: wrap;
             gap: 2vmin;
-            font-size: 2.5vmin; /* Adjusted font size */
+            font-size: 2.5vmin;
             text-shadow: 0 0 5px #00ffff;
             justify-content: center;
-            margin-bottom: 0; /* Adjusted margin */
+            margin-bottom: 0;
         }
         #health-bar-container {
-            width: 15vmin; /* Adjusted width */
-            height: 2vmin; /* Adjusted height */
+            width: 15vmin;
+            height: 2vmin;
             border: 2px solid #00ff00;
             border-radius: 5px;
             box-shadow: 0 0 5px #00ff00;
@@ -96,6 +97,11 @@
             align-items: center;
             justify-content: center;
             gap: 2vmin;
+            position: absolute; /* Allow it to be positioned freely */
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
         }
         #gameboy-controls {
             display: flex;
@@ -103,8 +109,10 @@
             justify-content: space-around;
             width: 100%;
             max-width: 800px;
-            transform: scale(1.0); /* Adjusted default scale */
+            transform: scale(1.0);
             transition: transform 0.2s ease-in-out;
+            cursor: grab;
+            position: relative; /* Allows child controls to be positioned */
         }
         .d-pad {
             display: grid;
@@ -125,7 +133,7 @@
             color: #00ffff;
             border: 2px solid #00ffff;
             border-radius: 5px;
-            font-size: 2.5vmin; /* Adjusted font size */
+            font-size: 2.5vmin;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -146,18 +154,18 @@
         .action-buttons {
             display: flex;
             flex-direction: column;
-            gap: 2vmin; /* Adjusted gap */
-            margin-left: 2vmin; /* Adjusted margin */
+            gap: 2vmin;
+            margin-left: 2vmin;
         }
         .action-button {
-            width: 8vmin; /* Adjusted width */
-            height: 8vmin; /* Adjusted height */
+            width: 8vmin;
+            height: 8vmin;
             border-radius: 50%;
             background-color: #ff00ff;
             color: #000;
             border: 2px solid #ff00ff;
             box-shadow: 0 0 10px #ff00ff;
-            font-size: 2.5vmin; /* Adjusted font size */
+            font-size: 2.5vmin;
             font-weight: bold;
             display: flex;
             align-items: center;
@@ -173,9 +181,9 @@
         }
 
         .menu-option {
-            padding: 1.5vmin 3vmin; /* Adjusted padding */
+            padding: 1.5vmin 3vmin;
             font-family: 'Orbitron', sans-serif;
-            font-size: 2.5vmin; /* Adjusted font size */
+            font-size: 2.5vmin;
             color: #000;
             background-color: #00ffff;
             border: 2px solid #00ffff;
@@ -222,7 +230,7 @@
             margin: 0;
             color: #00ffff;
             text-shadow: 0 0 5px #00ffff;
-            font-size: 4vmin; /* Adjusted font size */
+            font-size: 4vmin;
         }
         .control-sliders {
             display: flex;
@@ -236,7 +244,7 @@
             color: #00ffff;
         }
         .slider-group label {
-            font-size: 2vmin; /* Adjusted font size */
+            font-size: 2vmin;
             margin-bottom: 1vmin;
         }
         .slider-group input[type="range"] {
@@ -282,7 +290,7 @@
                 <div class="control-sliders">
                     <div class="slider-group">
                         <label for="control-size-slider">Control Size:</label>
-                        <input type="range" id="control-size-slider" min="50" max="150" value="100">
+                        <input type="range" id="control-size-slider" min="50" max="300" value="100">
                     </div>
                 </div>
             </div>
@@ -304,7 +312,7 @@
 
         <!-- Controls Area -->
         <div id="controls-container">
-             <div class="button-group">
+            <div class="button-group">
                 <button id="start-pause-button" class="menu-option">Start Game</button>
             </div>
             <div id="gameboy-controls">
@@ -545,14 +553,13 @@
                 this.size = 20;
                 this.x = 0;
                 this.y = 0;
-                this.speed = 1;
+                this.speed = 1.2;
                 this.color = '#ff9900';
                 this.lastShot = Date.now();
                 this.fireRate = 2000;
-                const directions = [{vx: 1, vy: 0}, {vx: -1, vy: 0}, {vx: 0, vy: 1}, {vx: 0, vy: -1}];
-                const randomDirection = directions[Math.floor(Math.random() * directions.length)];
-                this.vx = randomDirection.vx * this.speed;
-                this.vy = randomDirection.vy * this.speed;
+                this.changeDirectionCounter = 0;
+                this.changeDirectionThreshold = 100; // frames
+                this.changeDirection();
             }
             draw() {
                 ctx.strokeStyle = this.color;
@@ -569,33 +576,50 @@
                 ctx.stroke();
                 ctx.shadowBlur = 0;
             }
+            changeDirection() {
+                const directions = [{vx: 1, vy: 0}, {vx: -1, vy: 0}, {vx: 0, vy: 1}, {vx: 0, vy: -1}];
+                const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                this.vx = randomDirection.vx * this.speed;
+                this.vy = randomDirection.vy * this.speed;
+                this.changeDirectionCounter = 0;
+            }
             update() {
+                this.changeDirectionCounter++;
+                if (this.changeDirectionCounter > this.changeDirectionThreshold) {
+                    this.changeDirection();
+                }
+
                 const newX = this.x + this.vx;
                 const newY = this.y + this.vy;
-                
-                // Check collision for X axis, if collision, reverse direction
-                if (checkWallCollision(newX, this.y, this.size)) {
+
+                const nextWallX = checkWallCollision(newX, this.y, this.size);
+                const nextWallY = checkWallCollision(this.x, newY, this.size);
+
+                // If about to hit a wall, change direction
+                if (nextWallX) {
                     this.vx = -this.vx;
-                    this.x += this.vx; // Move away from the wall
+                    this.x += this.vx;
+                    this.changeDirection(); // Force a change
                 } else {
                     this.x = newX;
                 }
-
-                // Check collision for Y axis, if collision, reverse direction
-                if (checkWallCollision(this.x, newY, this.size)) {
+                if (nextWallY) {
                     this.vy = -this.vy;
-                    this.y += this.vy; // Move away from the wall
+                    this.y += this.vy;
+                    this.changeDirection(); // Force a change
                 } else {
                     this.y = newY;
                 }
             }
             shoot() {
                 if (Date.now() - this.lastShot > this.fireRate) {
+                    const angle = Math.atan2(player.y - this.y, player.x - this.x);
+                    const projectileSpeed = 3;
                     enemyProjectiles.push(new Projectile(
                         this.x + this.size / 2,
                         this.y + this.size / 2,
-                        0,
-                        3,
+                        projectileSpeed * Math.cos(angle),
+                        projectileSpeed * Math.sin(angle),
                         '#ff0000',
                         'player'
                     ));
@@ -909,6 +933,74 @@
             }
         }
 
+        // Variable for drag and drop functionality
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        // Mouse and touch event listeners for controls drag and drop
+        gameboyControlsContainer.addEventListener('mousedown', startDrag);
+        gameboyControlsContainer.addEventListener('touchstart', startDrag);
+
+        function startDrag(e) {
+            isDragging = true;
+            // Get initial position and offset
+            const rect = gameboyControlsContainer.getBoundingClientRect();
+            let clientX, clientY;
+            if (e.type.startsWith('touch')) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            dragOffsetX = clientX - rect.left;
+            dragOffsetY = clientY - rect.top;
+            gameboyControlsContainer.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+
+        function drag(e) {
+            if (!isDragging) return;
+            let clientX, clientY;
+            if (e.type.startsWith('touch')) {
+                if (e.touches.length === 0) return;
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            const mainContainer = document.getElementById('main-game-container');
+            const mainRect = mainContainer.getBoundingClientRect();
+
+            let newLeft = clientX - dragOffsetX;
+            let newTop = clientY - dragOffsetY;
+
+            // Clamp the position to stay within the main game container
+            newLeft = Math.max(mainRect.left, newLeft);
+            newLeft = Math.min(mainRect.right - gameboyControlsContainer.offsetWidth, newLeft);
+            newTop = Math.max(mainRect.top, newTop);
+            newTop = Math.min(mainRect.bottom - gameboyControlsContainer.offsetHeight, newTop);
+
+            gameboyControlsContainer.style.left = `${newLeft - mainRect.left}px`;
+            gameboyControlsContainer.style.top = `${newTop - mainRect.top}px`;
+            gameboyControlsContainer.style.transform = 'none'; // Clear the transform for dragging
+            e.preventDefault();
+        }
+
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchend', stopDrag);
+        document.addEventListener('touchcancel', stopDrag);
+
+        function stopDrag() {
+            isDragging = false;
+            gameboyControlsContainer.style.cursor = 'grab';
+        }
+
         function resizeCanvas() {
             canvas.width = gameContainer.clientWidth;
             canvas.height = gameContainer.clientHeight;
@@ -968,7 +1060,7 @@
                 clearTimeout(levelTimeoutId);
                 levelTimeoutId = null;
             }
-            isGameOver = true; // Set to true initially to prevent game loop from starting prematurely
+            isGameOver = true;
             isPaused = false;
             score = 0;
             isTransitioningLevel = false;
@@ -993,7 +1085,7 @@
             }
             gameContainer.style.boxShadow = defaultBorderShadow;
             gameContainer.style.borderColor = defaultBorderColor;
-            isGameOver = false; // Now set to false to start game loop
+            isGameOver = false;
             gameLoop();
         }
 

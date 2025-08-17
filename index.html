@@ -18,16 +18,52 @@
             margin: 0;
             overflow: hidden;
             text-align: center;
+            padding: 10px; /* Added padding to ensure no content is off-screen */
+            box-sizing: border-box; /* Ensures padding is included in the element's total width and height */
         }
-        #top-panel {
+
+        #main-game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Game Container */
+        #game-container {
+            position: relative;
+            width: 95vmin;
+            height: 95vmin;
+            max-width: 600px;
+            max-height: 600px;
+            background: #000;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px #00ffff, 0 0 10px #00ffff inset;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
+            margin-bottom: 20px; /* Space between canvas and info */
+        }
+
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Info Panel */
+        #info-panel-container {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 10px 0;
+            margin-bottom: 20px; /* Space between info and controls */
         }
         .info-panel {
             display: flex;
+            flex-wrap: wrap;
             gap: 20px;
             font-size: 1.2em;
             text-shadow: 0 0 5px #00ffff;
@@ -47,48 +83,21 @@
             transition: width 0.3s ease-in-out;
         }
 
-        #game-area {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        #game-container {
-            position: relative;
-            width: 95vmin;
-            height: 95vmin;
-            max-width: 600px;
-            max-height: 600px;
-            background: #000;
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 20px #00ffff, 0 0 10px #00ffff inset;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
-        }
-        #game-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .game-controls {
+        /* Controls */
+        #controls-container {
             padding: 10px;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
-        /* --- Game Boy Style Controls --- */
         #gameboy-controls {
             display: flex;
             align-items: center;
             justify-content: space-around;
             width: 100%;
             max-width: 800px;
+            transform: scale(1.1); /* Default 10% larger */
         }
         .d-pad {
             display: grid;
@@ -155,28 +164,6 @@
             transform: scale(0.95);
         }
 
-        /* --- Pause Menu --- */
-        #pause-menu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.85);
-            border: 2px solid #00ffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px #00ffff;
-            display: none;
-            z-index: 200;
-            flex-direction: column;
-            gap: 20px;
-            min-width: 300px;
-        }
-        #pause-menu h2 {
-            margin: 0;
-            color: #00ffff;
-            text-shadow: 0 0 5px #00ffff;
-        }
         .menu-option {
             padding: 10px 20px;
             font-family: 'Orbitron', sans-serif;
@@ -198,6 +185,35 @@
         .menu-option:active {
             transform: scale(1);
             box-shadow: 0 0 5px #00ffff;
+        }
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        /* Pause Menu and Message Box */
+        #pause-menu, #message-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px #00ffff;
+            display: none;
+            z-index: 200;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 300px;
+        }
+        #pause-menu h2, #message-box h2 {
+            margin: 0;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
         }
         .control-sliders {
             display: flex;
@@ -242,92 +258,60 @@
             border-radius: 50%;
             cursor: pointer;
         }
-
-        /* Message Box from original code */
-        #message-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #ff00ff;
-            padding: 20px 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px #ff00ff;
-            display: none;
-            z-index: 100;
-        }
-        #message-box h2 {
-            margin: 0 0 10px;
-            color: #ff00ff;
-        }
-        #message-box p {
-            margin: 0 0 20px;
-            font-size: 1.1em;
-        }
-        .instructions {
-            margin-top: 15px;
-            font-size: 0.9em;
-            color: #888;
-        }
-        .button-group {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
-    <div id="top-panel">
-        <div class="info-panel">
-            <p>Score: <span id="score-display">0</span></p>
-            <p>Enemies Left: <span id="enemies-display">3</span></p>
-            <p>Health: <div id="health-bar-container"><div id="health-bar"></div></div></p>
-        </div>
-        <div class="button-group">
-            <button id="start-button" class="menu-option">Start Game</button>
-            <button id="pause-button" class="menu-option" style="display: none;">Pause</button>
-        </div>
-    </div>
-
-    <!-- Game Area -->
-    <div id="game-area">
+    <div id="main-game-container">
+        <!-- Game Area -->
         <div id="game-container">
             <canvas id="game-canvas"></canvas>
-        </div>
-        <div id="pause-menu" style="display: none;">
-            <h2>Pause</h2>
-            <button id="resume-button" class="menu-option">Resume Game</button>
-            <button id="new-game-button" class="menu-option">New Game</button>
-            <div class="control-sliders">
-                <div class="slider-group">
-                    <label for="control-size-slider">Control Size:</label>
-                    <input type="range" id="control-size-slider" min="50" max="150" value="100">
+            <!-- Pause Menu and Message Box are children of game-container to be positioned over it -->
+            <div id="pause-menu" style="display: none;">
+                <h2>Pause</h2>
+                <button id="resume-button" class="menu-option">Resume Game</button>
+                <button id="new-game-button" class="menu-option">New Game</button>
+                <div class="control-sliders">
+                    <div class="slider-group">
+                        <label for="control-size-slider">Control Size:</label>
+                        <input type="range" id="control-size-slider" min="50" max="150" value="110">
+                    </div>
                 </div>
             </div>
-        </div>
-        <div id="message-box">
-            <h2 id="message-title">Game Over</h2>
-            <p id="message-text">Your final score is: <span id="final-score">0</span></p>
-            <button id="box-restart-button" class="menu-option">Play Again</button>
-        </div>
-    </div>
-
-    <!-- Controls Area -->
-    <div class="game-controls">
-        <div id="gameboy-controls">
-            <!-- D-Pad -->
-            <div class="d-pad">
-                <button class="d-pad-button up" data-direction="up">▲</button>
-                <button class="d-pad-button down" data-direction="down">▼</button>
-                <button class="d-pad-button left" data-direction="left">◄</button>
-                <button class="d-pad-button right" data-direction="right">►</button>
+            <div id="message-box">
+                <h2 id="message-title">Game Over</h2>
+                <p id="message-text">Your final score is: <span id="final-score">0</span></p>
+                <button id="box-restart-button" class="menu-option">Play Again</button>
             </div>
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="action-button" id="fire-button">A</button>
-                <button class="action-button" id="aim-button">B</button>
+        </div>
+
+        <!-- Info Panel -->
+        <div id="info-panel-container">
+            <div class="info-panel">
+                <p>Score: <span id="score-display">0</span></p>
+                <p>Enemies Left: <span id="enemies-display">3</span></p>
+                <p>Health: <div id="health-bar-container"><div id="health-bar"></div></div></p>
+            </div>
+            <div class="button-group">
+                <button id="start-button" class="menu-option">Start Game</button>
+                <button id="pause-button" class="menu-option" style="display: none;">Pause</button>
+            </div>
+        </div>
+
+        <!-- Controls Area -->
+        <div id="controls-container">
+            <div id="gameboy-controls">
+                <!-- D-Pad -->
+                <div class="d-pad">
+                    <button class="d-pad-button up" data-direction="up">▲</button>
+                    <button class="d-pad-button down" data-direction="down">▼</button>
+                    <button class="d-pad-button left" data-direction="left">◄</button>
+                    <button class="d-pad-button right" data-direction="right">►</button>
+                </div>
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="action-button" id="fire-button">A</button>
+                    <button class="action-button" id="aim-button">B</button>
+                </div>
             </div>
         </div>
     </div>
@@ -424,7 +408,7 @@
             x: 0,
             y: 0,
             size: 20,
-            baseSpeed: 1.5, // Reduced from 3
+            baseSpeed: 1.5,
             currentSpeed: 1.5,
             baseFireRate: 300,
             currentFireRate: 300,
@@ -456,8 +440,14 @@
             update: function() {
                 const newX = this.x + this.velocity.x;
                 const newY = this.y + this.velocity.y;
-                if (!checkWallCollision(newX, newY, this.size)) {
+                
+                // Check collision for X axis first
+                if (!checkWallCollision(newX, this.y, this.size)) {
                     this.x = newX;
+                }
+                
+                // Then check collision for Y axis
+                if (!checkWallCollision(this.x, newY, this.size)) {
                     this.y = newY;
                 }
             }
@@ -548,7 +538,7 @@
                 this.size = 20;
                 this.x = 0;
                 this.y = 0;
-                this.speed = 1; // Reduced from 2
+                this.speed = 1;
                 this.color = '#ff9900';
                 this.lastShot = Date.now();
                 this.fireRate = 2000;
@@ -573,11 +563,28 @@
             update() {
                 const newX = this.x + this.vx;
                 const newY = this.y + this.vy;
-                if (checkWallCollision(newX, newY, this.size)) {
+                
+                // Check collision for X axis, if collision, reverse direction
+                if (checkWallCollision(newX, this.y, this.size)) {
                     this.vx = -this.vx;
-                    this.vy = -this.vy;
+                    this.x += this.vx; // Move away from the wall
+                    // Also choose a new random Y direction if the path is clear
+                    if (!checkWallCollision(this.x, this.y + this.vy, this.size)) {
+                         this.vy = (Math.random() < 0.5 ? 1 : -1) * this.speed;
+                    }
                 } else {
                     this.x = newX;
+                }
+
+                // Check collision for Y axis, if collision, reverse direction
+                if (checkWallCollision(this.x, newY, this.size)) {
+                    this.vy = -this.vy;
+                    this.y += this.vy; // Move away from the wall
+                    // Also choose a new random X direction if the path is clear
+                    if (!checkWallCollision(this.x + this.vx, this.y, this.size)) {
+                         this.vx = (Math.random() < 0.5 ? 1 : -1) * this.speed;
+                    }
+                } else {
                     this.y = newY;
                 }
             }
@@ -668,8 +675,9 @@
             document.getElementById('message-title').textContent = 'Game Over';
             document.getElementById('message-text').style.display = 'block';
             boxRestartButton.style.display = 'block';
-            messageBox.style.display = 'block';
+            messageBox.style.display = 'flex';
             pauseButton.style.display = 'none';
+            startButton.style.display = 'block';
         }
 
         function winLevel() {
@@ -680,7 +688,7 @@
             document.getElementById('message-title').textContent = 'Level Complete!';
             document.getElementById('message-text').textContent = `Your current score is: ${score}`;
             boxRestartButton.style.display = 'none';
-            messageBox.style.display = 'block';
+            messageBox.style.display = 'flex';
             levelTimeoutId = setTimeout(() => {
                 startNewLevel();
             }, 2000);
@@ -810,13 +818,11 @@
             'right': 'ArrowRight'
         };
 
-        // Touch state for buttons
         const touchState = {
             'up': false, 'down': false, 'left': false, 'right': false,
             'fire': false, 'aim': false
         };
 
-        // Keyboard event listeners
         document.addEventListener('keydown', (e) => {
             keys[e.key] = true;
             if (e.key === ' ' || e.key === 'p' || e.key === 'P') {
@@ -827,7 +833,6 @@
             keys[e.key] = false;
         });
 
-        // Touch/Mouse event listeners for new controls
         dPad.querySelectorAll('.d-pad-button').forEach(button => {
             const direction = button.dataset.direction;
             button.addEventListener('mousedown', () => touchState[direction] = true);
@@ -868,7 +873,6 @@
         });
         aimButton.addEventListener('touchcancel', () => touchState['aim'] = false);
 
-        // Update player movement and actions based on keys and touch controls
         function updatePlayerMovement() {
             player.velocity.x = 0;
             player.velocity.y = 0;
@@ -877,7 +881,6 @@
             if (keys['ArrowLeft'] || keys['a'] || touchState['left']) player.velocity.x = -player.currentSpeed;
             if (keys['ArrowRight'] || keys['d'] || touchState['right']) player.velocity.x = player.currentSpeed;
 
-            // Turret aiming with 'B' button (aimButton)
             isAiming = keys['b'] || touchState['aim'];
             if (isAiming) {
                 if (keys['ArrowUp'] || keys['w'] || touchState['up']) player.turretAngle = -Math.PI / 2;
@@ -885,14 +888,12 @@
                 if (keys['ArrowLeft'] || keys['a'] || touchState['left']) player.turretAngle = Math.PI;
                 if (keys['ArrowRight'] || keys['d'] || touchState['right']) player.turretAngle = 0;
             } else {
-                // If not aiming, turret aligns with movement
                 if (player.velocity.x === 0 && player.velocity.y < 0) player.turretAngle = -Math.PI / 2;
                 else if (player.velocity.x === 0 && player.velocity.y > 0) player.turretAngle = Math.PI / 2;
                 else if (player.velocity.x < 0 && player.velocity.y === 0) player.turretAngle = Math.PI;
                 else if (player.velocity.x > 0 && player.velocity.y === 0) player.turretAngle = 0;
             }
 
-            // Shooting with 'A' button (fireButton)
             isShooting = keys[' '] || touchState['fire'];
             if (isShooting && Date.now() - lastPlayerShot > player.currentFireRate) {
                 const projectileSpeed = 7;
@@ -912,7 +913,6 @@
             canvas.height = gameContainer.clientHeight;
             CELL_SIZE = Math.floor(Math.min(canvas.width / MAZE_WIDTH, canvas.height / MAZE_HEIGHT));
             player.size = CELL_SIZE * 0.4;
-            // Reposition player after resize to prevent being stuck in walls
             let placed = false;
             for (let y = 0; y < MAZE_HEIGHT && !placed; y++) {
                 for (let x = 0; x < MAZE_WIDTH; x++) {
@@ -967,7 +967,7 @@
                 clearTimeout(levelTimeoutId);
                 levelTimeoutId = null;
             }
-            isGameOver = false;
+            isGameOver = true; // Set to true initially to prevent game loop from starting prematurely
             isPaused = false;
             score = 0;
             isTransitioningLevel = false;
@@ -994,6 +994,7 @@
             }
             gameContainer.style.boxShadow = defaultBorderShadow;
             gameContainer.style.borderColor = defaultBorderColor;
+            isGameOver = false; // Now set to false to start game loop
             gameLoop();
         }
 
@@ -1027,7 +1028,6 @@
         newGameButton.addEventListener('click', startGame);
         boxRestartButton.addEventListener('click', startGame);
 
-        // Control size slider
         controlSizeSlider.addEventListener('input', (e) => {
             const size = e.target.value;
             gameboyControlsContainer.style.transform = `scale(${size / 100})`;
@@ -1039,6 +1039,8 @@
             player.x = (canvas.width / 2) - (player.size / 2);
             player.y = canvas.height - 50;
             updateHealthBar();
+            // Apply default scale on load
+            gameboyControlsContainer.style.transform = `scale(${controlSizeSlider.value / 100})`;
         };
     </script>
 </body>

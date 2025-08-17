@@ -13,7 +13,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             height: 100vh;
             margin: 0;
             overflow: hidden;
@@ -26,10 +26,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start; /* Changed to flex-start for tighter spacing */
             width: 100%;
             max-width: 650px;
             height: 100%;
+            gap: 20px; /* Added a gap for consistent spacing */
         }
 
         /* Game Container */
@@ -45,7 +46,7 @@
             border-radius: 10px;
             overflow: hidden;
             transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
-            margin-bottom: 2vmin;
+            margin-bottom: 0; /* Adjusted margin */
         }
 
         #game-canvas {
@@ -61,6 +62,7 @@
             flex-direction: column;
             align-items: center;
             padding: 1vmin 0;
+            margin-bottom: 0; /* Adjusted margin */
         }
         .info-panel {
             display: flex;
@@ -69,7 +71,7 @@
             font-size: 2.5vmin; /* Adjusted font size */
             text-shadow: 0 0 5px #00ffff;
             justify-content: center;
-            margin-bottom: 2vmin;
+            margin-bottom: 0; /* Adjusted margin */
         }
         #health-bar-container {
             width: 15vmin; /* Adjusted width */
@@ -547,8 +549,10 @@
                 this.color = '#ff9900';
                 this.lastShot = Date.now();
                 this.fireRate = 2000;
-                this.vx = (Math.random() < 0.5 ? 1 : -1) * this.speed;
-                this.vy = (Math.random() < 0.5 ? 1 : -1) * this.speed;
+                const directions = [{vx: 1, vy: 0}, {vx: -1, vy: 0}, {vx: 0, vy: 1}, {vx: 0, vy: -1}];
+                const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                this.vx = randomDirection.vx * this.speed;
+                this.vy = randomDirection.vy * this.speed;
             }
             draw() {
                 ctx.strokeStyle = this.color;
@@ -573,10 +577,6 @@
                 if (checkWallCollision(newX, this.y, this.size)) {
                     this.vx = -this.vx;
                     this.x += this.vx; // Move away from the wall
-                    // Also choose a new random Y direction if the path is clear
-                    if (!checkWallCollision(this.x, this.y + this.vy, this.size)) {
-                         this.vy = (Math.random() < 0.5 ? 1 : -1) * this.speed;
-                    }
                 } else {
                     this.x = newX;
                 }
@@ -585,10 +585,6 @@
                 if (checkWallCollision(this.x, newY, this.size)) {
                     this.vy = -this.vy;
                     this.y += this.vy; // Move away from the wall
-                    // Also choose a new random X direction if the path is clear
-                    if (!checkWallCollision(this.x + this.vx, this.y, this.size)) {
-                         this.vx = (Math.random() < 0.5 ? 1 : -1) * this.speed;
-                    }
                 } else {
                     this.y = newY;
                 }

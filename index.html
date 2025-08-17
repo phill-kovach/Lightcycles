@@ -13,45 +13,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Align to the top to fit the game layout */
+            justify-content: space-between;
             height: 100vh;
             margin: 0;
             overflow: hidden;
             text-align: center;
         }
-        #main-container {
+        #top-panel {
+            width: 100%;
             display: flex;
             flex-direction: column;
-            width: 100%;
-            height: 100%;
-        }
-        #game-area {
-            flex: 1; /* Game canvas takes up 50% of screen height */
-            display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-        #game-container {
-            position: relative;
-            width: 95vmin;
-            height: 95vmin;
-            max-width: 600px;
-            max-height: 600px;
-            background: #000;
-            border: 2px solid #00ffff;
-            box-shadow: 0 0 20px #00ffff, 0 0 10px #00ffff inset;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
-        }
-        #game-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
+            padding: 10px 0;
         }
         .info-panel {
-            margin-top: 10px;
             display: flex;
             gap: 20px;
             font-size: 1.2em;
@@ -71,12 +46,40 @@
             background-color: #00ff00;
             transition: width 0.3s ease-in-out;
         }
-        .game-controls {
-            flex: 1; /* Controls take up the bottom 50% of the screen */
+
+        #game-area {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
             padding: 10px;
+            box-sizing: border-box;
+        }
+        #game-container {
+            position: relative;
+            width: 95vmin;
+            height: 95vmin;
+            max-width: 600px;
+            max-height: 600px;
+            background: #000;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px #00ffff, 0 0 10px #00ffff inset;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: box-shadow 0.5s ease-in-out, border-color 0.5s ease-in-out;
+        }
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .game-controls {
+            padding: 10px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* --- Game Boy Style Controls --- */
@@ -267,60 +270,65 @@
             font-size: 0.9em;
             color: #888;
         }
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div id="main-container">
-        <!-- Game Area (Top 50%) -->
-        <div id="game-area">
-            <div id="game-container">
-                <canvas id="game-canvas"></canvas>
-            </div>
-            <div id="pause-menu" style="display: none;">
-                <h2>Pause</h2>
-                <button id="resume-button" class="menu-option">Resume Game</button>
-                <button id="new-game-button" class="menu-option">New Game</button>
-                <div class="control-sliders">
-                    <div class="slider-group">
-                        <label for="control-size-slider">Control Size:</label>
-                        <input type="range" id="control-size-slider" min="50" max="150" value="100">
-                    </div>
-                </div>
-            </div>
-            <div id="message-box">
-                <h2 id="message-title">Game Over</h2>
-                <p id="message-text">Your final score is: <span id="final-score">0</span></p>
-                <button id="box-restart-button" class="menu-option">Play Again</button>
-            </div>
-        </div>
-
-        <!-- Controls Area (Bottom 50%) -->
-        <div class="game-controls">
-            <div id="gameboy-controls">
-                <!-- D-Pad -->
-                <div class="d-pad">
-                    <button class="d-pad-button up" data-direction="up">▲</button>
-                    <button class="d-pad-button down" data-direction="down">▼</button>
-                    <button class="d-pad-button left" data-direction="left">◄</button>
-                    <button class="d-pad-button right" data-direction="right">►</button>
-                </div>
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button class="action-button" id="fire-button">A</button>
-                    <button class="action-button" id="aim-button">B</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Info and other elements -->
+    <div id="top-panel">
         <div class="info-panel">
             <p>Score: <span id="score-display">0</span></p>
             <p>Enemies Left: <span id="enemies-display">3</span></p>
             <p>Health: <div id="health-bar-container"><div id="health-bar"></div></div></p>
         </div>
-        <div class="game-controls" style="margin-top: 20px;">
+        <div class="button-group">
             <button id="start-button" class="menu-option">Start Game</button>
             <button id="pause-button" class="menu-option" style="display: none;">Pause</button>
+        </div>
+    </div>
+
+    <!-- Game Area -->
+    <div id="game-area">
+        <div id="game-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+        <div id="pause-menu" style="display: none;">
+            <h2>Pause</h2>
+            <button id="resume-button" class="menu-option">Resume Game</button>
+            <button id="new-game-button" class="menu-option">New Game</button>
+            <div class="control-sliders">
+                <div class="slider-group">
+                    <label for="control-size-slider">Control Size:</label>
+                    <input type="range" id="control-size-slider" min="50" max="150" value="100">
+                </div>
+            </div>
+        </div>
+        <div id="message-box">
+            <h2 id="message-title">Game Over</h2>
+            <p id="message-text">Your final score is: <span id="final-score">0</span></p>
+            <button id="box-restart-button" class="menu-option">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Controls Area -->
+    <div class="game-controls">
+        <div id="gameboy-controls">
+            <!-- D-Pad -->
+            <div class="d-pad">
+                <button class="d-pad-button up" data-direction="up">▲</button>
+                <button class="d-pad-button down" data-direction="down">▼</button>
+                <button class="d-pad-button left" data-direction="left">◄</button>
+                <button class="d-pad-button right" data-direction="right">►</button>
+            </div>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-button" id="fire-button">A</button>
+                <button class="action-button" id="aim-button">B</button>
+            </div>
         </div>
     </div>
 
@@ -416,8 +424,8 @@
             x: 0,
             y: 0,
             size: 20,
-            baseSpeed: 3,
-            currentSpeed: 3,
+            baseSpeed: 1.5, // Reduced from 3
+            currentSpeed: 1.5,
             baseFireRate: 300,
             currentFireRate: 300,
             health: 100,
@@ -540,7 +548,7 @@
                 this.size = 20;
                 this.x = 0;
                 this.y = 0;
-                this.speed = 2;
+                this.speed = 1; // Reduced from 2
                 this.color = '#ff9900';
                 this.lastShot = Date.now();
                 this.fireRate = 2000;
@@ -566,39 +574,18 @@
                 const newX = this.x + this.vx;
                 const newY = this.y + this.vy;
                 if (checkWallCollision(newX, newY, this.size)) {
-                    const directions = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
-                    directions.sort(() => Math.random() - 0.5);
-                    let foundNewPath = false;
-                    for (const dir of directions) {
-                        const testX = this.x + dir.x * CELL_SIZE;
-                        const testY = this.y + dir.y * CELL_SIZE;
-                        if (!checkWallCollision(testX, testY, this.size)) {
-                            this.vx = dir.x * this.speed;
-                            this.vy = dir.y * this.speed;
-                            foundNewPath = true;
-                            break;
-                        }
-                    }
-                    if (!foundNewPath) {
-                        this.vx = -this.vx;
-                        this.vy = -this.vy;
-                    }
+                    this.vx = -this.vx;
+                    this.vy = -this.vy;
                 } else {
                     this.x = newX;
                     this.y = newY;
-                }
-                if (Math.random() < 0.005) {
-                    const directions = [{x: 1, y: 0}, {x: -1, y: 0}, {x: 0, y: 1}, {x: 0, y: -1}];
-                    const newDir = directions[Math.floor(Math.random() * directions.length)];
-                    this.vx = newDir.x * this.speed;
-                    this.vy = newDir.y * newDir.y * this.speed;
                 }
             }
             shoot() {
                 if (Date.now() - this.lastShot > this.fireRate) {
                     enemyProjectiles.push(new Projectile(
                         this.x + this.size / 2,
-                        this.y + this.size,
+                        this.y + this.size / 2,
                         0,
                         3,
                         '#ff0000',
@@ -823,6 +810,12 @@
             'right': 'ArrowRight'
         };
 
+        // Touch state for buttons
+        const touchState = {
+            'up': false, 'down': false, 'left': false, 'right': false,
+            'fire': false, 'aim': false
+        };
+
         // Keyboard event listeners
         document.addEventListener('keydown', (e) => {
             keys[e.key] = true;
@@ -836,57 +829,61 @@
 
         // Touch/Mouse event listeners for new controls
         dPad.querySelectorAll('.d-pad-button').forEach(button => {
-            const direction = dpadDirections[button.dataset.direction];
-            button.addEventListener('mousedown', () => keys[direction] = true);
-            button.addEventListener('mouseup', () => keys[direction] = false);
-            button.addEventListener('mouseleave', () => keys[direction] = false);
+            const direction = button.dataset.direction;
+            button.addEventListener('mousedown', () => touchState[direction] = true);
+            button.addEventListener('mouseup', () => touchState[direction] = false);
+            button.addEventListener('mouseleave', () => touchState[direction] = false);
             button.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                keys[direction] = true;
+                touchState[direction] = true;
             });
             button.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                keys[direction] = false;
+                touchState[direction] = false;
             });
+            button.addEventListener('touchcancel', () => touchState[direction] = false);
         });
 
-        fireButton.addEventListener('mousedown', () => isShooting = true);
-        fireButton.addEventListener('mouseup', () => isShooting = false);
+        fireButton.addEventListener('mousedown', () => touchState['fire'] = true);
+        fireButton.addEventListener('mouseup', () => touchState['fire'] = false);
         fireButton.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            isShooting = true;
+            touchState['fire'] = true;
         });
         fireButton.addEventListener('touchend', (e) => {
             e.preventDefault();
-            isShooting = false;
+            touchState['fire'] = false;
         });
+        fireButton.addEventListener('touchcancel', () => touchState['fire'] = false);
 
-        aimButton.addEventListener('mousedown', () => isAiming = true);
-        aimButton.addEventListener('mouseup', () => isAiming = false);
+        aimButton.addEventListener('mousedown', () => touchState['aim'] = true);
+        aimButton.addEventListener('mouseup', () => touchState['aim'] = false);
         aimButton.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            isAiming = true;
+            touchState['aim'] = true;
         });
         aimButton.addEventListener('touchend', (e) => {
             e.preventDefault();
-            isAiming = false;
+            touchState['aim'] = false;
         });
+        aimButton.addEventListener('touchcancel', () => touchState['aim'] = false);
 
         // Update player movement and actions based on keys and touch controls
         function updatePlayerMovement() {
             player.velocity.x = 0;
             player.velocity.y = 0;
-            if (keys['ArrowUp'] || keys['w']) player.velocity.y = -player.currentSpeed;
-            if (keys['ArrowDown'] || keys['s']) player.velocity.y = player.currentSpeed;
-            if (keys['ArrowLeft'] || keys['a']) player.velocity.x = -player.currentSpeed;
-            if (keys['ArrowRight'] || keys['d']) player.velocity.x = player.currentSpeed;
+            if (keys['ArrowUp'] || keys['w'] || touchState['up']) player.velocity.y = -player.currentSpeed;
+            if (keys['ArrowDown'] || keys['s'] || touchState['down']) player.velocity.y = player.currentSpeed;
+            if (keys['ArrowLeft'] || keys['a'] || touchState['left']) player.velocity.x = -player.currentSpeed;
+            if (keys['ArrowRight'] || keys['d'] || touchState['right']) player.velocity.x = player.currentSpeed;
 
             // Turret aiming with 'B' button (aimButton)
+            isAiming = keys['b'] || touchState['aim'];
             if (isAiming) {
-                if (keys['ArrowUp'] || keys['w']) player.turretAngle = -Math.PI / 2;
-                if (keys['ArrowDown'] || keys['s']) player.turretAngle = Math.PI / 2;
-                if (keys['ArrowLeft'] || keys['a']) player.turretAngle = Math.PI;
-                if (keys['ArrowRight'] || keys['d']) player.turretAngle = 0;
+                if (keys['ArrowUp'] || keys['w'] || touchState['up']) player.turretAngle = -Math.PI / 2;
+                if (keys['ArrowDown'] || keys['s'] || touchState['down']) player.turretAngle = Math.PI / 2;
+                if (keys['ArrowLeft'] || keys['a'] || touchState['left']) player.turretAngle = Math.PI;
+                if (keys['ArrowRight'] || keys['d'] || touchState['right']) player.turretAngle = 0;
             } else {
                 // If not aiming, turret aligns with movement
                 if (player.velocity.x === 0 && player.velocity.y < 0) player.turretAngle = -Math.PI / 2;
@@ -896,6 +893,7 @@
             }
 
             // Shooting with 'A' button (fireButton)
+            isShooting = keys[' '] || touchState['fire'];
             if (isShooting && Date.now() - lastPlayerShot > player.currentFireRate) {
                 const projectileSpeed = 7;
                 projectiles.push(new Projectile(
@@ -1045,3 +1043,4 @@
     </script>
 </body>
 </html>
+
